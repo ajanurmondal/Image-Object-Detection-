@@ -1,0 +1,57 @@
+## Object Detection In Image through DNN & Computer vision ##
+!pip install opencv-python
+#Importing opencv library
+import cv2
+
+#Importing ML and Data visualisation library
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+#Loading configuration file and model file
+config_file = 'ssd_mobilenet_v3_large_coco_2020_01_14.pbtxt'
+frozen_model = 'frozen_inference_graph.pb'
+
+#Creating model through DNN detection model
+model=cv2.dnn_DetectionModel(frozen_model, config_file)
+
+#Creating object label with object name
+classlabels=[]
+filename = 'Labels.txt'
+with open(filename, 'rt') as fl:
+    classlabels=fl.read().rstrip('\n').split('\n')
+    
+    
+print(classlabels)
+print(len(classlabels)) # There are total 80 class label
+img = cv2.imread('image_000000001.jpg')
+
+plt.imshow(img)
+#This is a BGR(Blue Green Red) image
+
+#Showing BGR image to RGB(Red Green Blue) image which is original image
+plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+
+#Doing above image converting process automaically by model parameter
+model.setInputSize(320,320)
+model.setInputScale(1.0/127.5)
+model.setInputMean ((127.5, 127.5, 127.5))
+model.setInputSwapRB(True)
+
+ClassIndex, confidence, bbox= model.detect(img, confThreshold=0.5)
+
+print(ClassIndex)
+print(confidence)
+print(bbox)
+
+#Using below method for flattening the label and create rectangular box
+
+font_scale=3
+font=cv2.FONT_HERSHEY_PLAIN
+for Classindex, confid, boxes in zip(ClassIndex.flatten(), confidence.flatten(), bbox):
+    cv2.rectangle(img, boxes, (255, 0, 0), 2)
+    cv2.putText(img, classlabels[Classindex-1].upper(), (boxes[0]+10, boxes[1]+40), font, fontScale=font_scale, color=(0,255,0),thickness=3)
+
+ #classlabels[Classindex-1].upper() using this upper keyword, will give the object name with uppercase.
+
+plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB),)
+#Objects are detected into this image
